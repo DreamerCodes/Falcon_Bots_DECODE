@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name = "Launcher Test")
+//@Disabled
 public class LauncherTest extends OpMode {
     // Declare OpMode members
     private ElapsedTime runtime = new ElapsedTime();
