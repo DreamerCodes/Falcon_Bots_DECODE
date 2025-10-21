@@ -15,8 +15,15 @@ public class OmniOpMode1P extends LinearOpMode {
     private DcMotor rightFrontDrive = null;
     private DcMotor rightBackDrive = null;
 
-    //private DcMotor beltLaunchRight = null;
-    //private DcMotor beltLaunchLeft = null;
+    private DcMotor beltLaunchRight = null;
+    private DcMotor beltLaunchLeft = null;
+
+    double launcherPower = 0.0;
+    String launcherStatus = "off";
+
+    // Track previous D-pad states to detect single presses
+    boolean lastDpadUp = false;
+    boolean lastDpadDown = false;
 
     //private DcMotor intake = null;
     //private DcMotor sorter = null;
@@ -31,12 +38,10 @@ public class OmniOpMode1P extends LinearOpMode {
         leftFrontDrive = hardwareMap.get(DcMotor.class, "left_front_drive");
         leftBackDrive = hardwareMap.get(DcMotor.class, "left_back_drive");
 
-        //beltLaunchRight = hardwareMap.get(DcMotor.class, "belt_launch_right");
-        //beltLaunchLeft = hardwareMap.get(DcMotor.class, "belt_launch_left");
+        beltLaunchRight = hardwareMap.get(DcMotor.class, "belt_launch_right");
+        beltLaunchLeft = hardwareMap.get(DcMotor.class, "belt_launch_left");
 
-        // intake = hardwareMap.get(DcMotor.class, "scoop");
-        // sorter = hardwareMap.get(DcMotor.class, "sorter");
-
+        /*
         // ########################################################################################
         // !!!            IMPORTANT Drive Information. Test your motor directions.            !!!!!
         // ########################################################################################
@@ -47,12 +52,15 @@ public class OmniOpMode1P extends LinearOpMode {
         // when you first test your robot, push the left joystick forward and observe the direction the wheels turn.
         // Reverse the direction (flip FORWARD <-> REVERSE ) of any wheel that runs backward
         // Keep testing until ALL the wheels move the robot forward when you push the left joystick forward.
+        */
+
         leftFrontDrive.setDirection(DcMotor.Direction.REVERSE);
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
 
-        //beltLaunchRight.setDirection(DcMotor.Direction.FORWARD);
+        beltLaunchRight.setDirection(DcMotor.Direction.REVERSE);
+        beltLaunchLeft.setDirection(DcMotor.Direction.FORWARD);
 
         // Wait for the game to start (driver presses START)
         telemetry.addData("Status", "Initialized");
@@ -114,40 +122,34 @@ public class OmniOpMode1P extends LinearOpMode {
 
 
             //LAUNCHER/BELT GUN//
-            /*
-            if (gamepad1.x) {
-                beltLaunchLeft.setPower(1.0);
-                beltLaunchRight.setPower(-1.0);
-                telemetry.addData("Launcher", "shoot");
+            // A & B buttons for on/off control
+            if (gamepad1.a) {
+                launcherPower = 0.1;
+                launcherStatus = "on";
+            }
+            if (gamepad1.b) {
+                launcherPower = 0.0;
+                launcherStatus = "off";
             }
 
-            else {
-                telemetry.addData("Launcher", "idle");
-
-                beltLaunchLeft.setPower(0);
-                beltLaunchLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-                beltLaunchRight.setPower(0);
-                beltLaunchRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            // D-pad increment/decrement with single press detection
+            if (gamepad1.dpad_up && !lastDpadUp && launcherPower < 1.0) {
+                launcherPower += 0.1;
+            }
+            if (gamepad1.dpad_down && !lastDpadDown && launcherPower > 0.0) {
+                launcherPower -= 0.1;
             }
 
-            //SORTER//
-            if (gamepad1.dpad_right) {
-                sorter.setPower(.3);
-                telemetry.addData("Sorter", "spinning right");
-            }
+            // Clamp power to valid range (0.0 to 1.0)
+            launcherPower = Math.max(0.0, Math.min(1.0, launcherPower));
 
-            else if (gamepad1.dpad_left) {
-                sorter.setPower(-.3);
-                telemetry.addData("Sorter", "spinning left");
-            }
+            // Update previous button states
+            lastDpadUp = gamepad1.dpad_up;
+            lastDpadDown = gamepad1.dpad_down;
 
-            else {
-                telemetry.addData("Sorter", "idle");
-                sorter.setPower(0);
-                sorter.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            }
-            */
+            // Apply power to both motors
+            beltLaunchRight.setPower(launcherPower);
+            beltLaunchLeft.setPower(launcherPower);
 
             //INTAKE//
 
